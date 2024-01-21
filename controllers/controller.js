@@ -57,3 +57,46 @@ exports.getTweets = async (req, res) => {
     return sendError(res, 500, error.message);
   }
 };
+
+
+exports.getUsers = async (req, res) => {
+  try {
+    const { userCode } = req.payload;
+    const response = await Services.getUsers(res, userCode);
+    return response;
+  } catch (error) {
+    return sendError(res, 500, error.message);
+  }
+};
+
+exports.getMe = async (req, res) => {
+  try {
+    const { userCode } = req.payload;
+    const response = await Services.getMe(res, userCode);
+    return response;
+  } catch (error) {
+    return sendError(res, 500, error.message);
+  }
+};
+
+
+exports.getFollowing = async (req, res) => {
+  try {
+    const { userCode } = req.payload;
+    const response = await Services.getFollowing(res, userCode);
+    return response;
+  } catch (error) {
+    return sendError(res, 500, error.message);
+  }
+};
+
+
+exports.getFollowers = async (req, res) => {
+  try {
+    const { userCode } = req.payload;
+    const response = await Services.getFollowers(res, userCode);
+    return response;
+  } catch (error) {
+    return sendError(res, 500, error.message);
+  }
+};

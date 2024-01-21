@@ -18,27 +18,31 @@ Node Js v18.0.0
 .env
 ```
 MONGO_URL = <YOUR_MONGODB_URL>
-PORT = 3000
+PORT = 3005
 SECRET = G*advd^&jKSAI&^%$
 ```
 
 ```
-git clone https://github.com/apurbar06/Twitter_Backend.git
-cd Twitter_Backend
+https://github.com/apurbar06/MERN_things.git
+cd Simple_Tweet/server
 npm install
 npm run dev
 ```
 
 
-if everything is correct then the server will run at PORT 3000.
+if everything is correct then the server will run at PORT 3005.
 
 #### Routs:
 ```
 http://localhost:3000/api/signup      Method: POST , body: userName ,password, email
 http://localhost:3000/api/login       Method: POST , body: password, email
-http://localhost:3000/api/follow      Method: POST , body: followinguserCode, authentication: Bearar Token
-http://localhost:3000/api/tweets      Method: POST , body: tweet , authentication: Bearar Token
-http://localhost:3000/api/tweets      Method: GET ,  authentication: Bearar Token
+http://localhost:3000/api/me          Method: GET ,  authentication: Bearer Token
+http://localhost:3000/api/users       Method: GET ,  authentication: Bearer Token
+http://localhost:3000/api/following   Method: GET ,  authentication: Bearer Token
+http://localhost:3000/api/followers   Method: GET ,  authentication: Bearer Token
+http://localhost:3000/api/follow      Method: POST , body: followinguserCode, authentication: Bearer Token
+http://localhost:3000/api/tweets      Method: POST , body: tweet , authentication: Bearer Token
+http://localhost:3000/api/tweets      Method: GET ,  authentication: Bearer Token
 ```
 
 

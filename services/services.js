@@ -144,7 +144,9 @@ exports.getTweets = async (res, userCode) => {
       {
         $lookup: {
           from: "followerfollowingusers",
-          let: { followerUserCode: "$userCode" },
+          let: {
+            followerUserCode: "$userCode",
+          },
           pipeline: [
             {
               $match: {
@@ -160,7 +162,9 @@ exports.getTweets = async (res, userCode) => {
             {
               $group: {
                 _id: "$_id",
-                followingUserCodes: { $push: "$followingUserCode" },
+                followingUserCodes: {
+                  $push: "$followingUserCode",
+                },
               },
             },
           ],
@@ -177,11 +181,14 @@ exports.getTweets = async (res, userCode) => {
         $set: {
           followingUserCodes: {
             $cond: {
-              if: { $isArray: "$codes.followingUserCodes" },
+              if: {
+                $isArray: "$codes.followingUserCodes",
+              },
               then: {
                 $concatArrays: ["$codes.followingUserCodes", ["$userCode"]],
               },
-              else: ["$userCode"], // If existingArray is not an array or doesn't exist, provide a new array with the ID
+              else: ["$userCode"],
+              // If existingArray is not an array or doesn't exist, provide a new array with the ID
             },
           },
         },
@@ -214,11 +221,27 @@ exports.getTweets = async (res, userCode) => {
               },
             },
             {
+              $lookup: {
+                from: "users",
+                localField: "userCode",
+                foreignField: "userCode",
+                as: "userDetails",
+              },
+            },
+            {
+              $unwind: {
+                path: "$userDetails",
+                preserveNullAndEmptyArrays: true,
+              },
+            },
+            {
               $project: {
                 _id: 0,
                 message: 1,
                 userCode: 1,
                 messageCode: 1,
+                userName: "$userDetails.userName",
+                createdAt: 1,
               },
             },
           ],
@@ -228,6 +251,7 @@ exports.getTweets = async (res, userCode) => {
       {
         $project: {
           tweets: "$tweets",
+          copies_sold: "$copies_sold",
         },
       },
     ]);
@@ -239,3 +263,145 @@ exports.getTweets = async (res, userCode) => {
     return sendError(res, 500, error.message);
   }
 };
+
+exports.getUsers = async (res, userCode) => {
+  try {
+    let data = await User.aggregate([
+      {
+        $lookup: {
+          from: "followerfollowingusers",
+          localField: "userCode",
+          foreignField: "followingUserCode",
+          as: "folowwingUsers",
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          userName: 1,
+          userCode: 1,
+          isFollowing: {
+            $cond: {
+              if: {
+                $gt: [
+                  {
+                    $size: {
+                      $filter: {
+                        input: "$folowwingUsers",
+                        as: "user",
+                        cond: {
+                          $eq: ["$$user.followerUserCode", userCode],
+                        },
+                      },
+                    },
+                  },
+                  0,
+                ],
+              },
+              then: true,
+              else: false,
+            },
+          },
+        },
+      },
+    ]);
+
+    return sendSuccess(res, 200, "", {
+      users: data.length ? data : [],
+    });
+  } catch (error) {
+    return sendError(res, 500, error.message);
+  }
+};
+
+
+
+exports.getMe = async (res, userCode) => {
+  try {
+    let data = await User.findOne({userCode: userCode})
+
+    return sendSuccess(res, 200, "", {
+      user: data,
+    });
+  } catch (error) {
+    return sendError(res, 500, error.message);
+  }
+};
+
+
+
+exports.getFollowing = async (res, userCode) => {
+  try {
+    let data = await User.aggregate([
+      {
+        $lookup: {
+          from: "followerfollowingusers",
+          localField: "userCode",
+          foreignField: "followingUserCode",
+          as: "followingUsers",
+        },
+      },
+      {
+        $match: {
+          "followingUsers.followerUserCode": userCode
+        }
+      },
+      {
+        $project: {
+          _id: 0,
+          userName: 1,
+          userCode: 1,
+          isFollowing: { $literal: true },
+        },
+      },
+    ]);
+
+    return sendSuccess(res, 200, "", {
+      users: data.length ? data : [],
+    });
+  } catch (error) {
+    return sendError(res, 500, error.message);
+  }
+};
+
+
+
+
+
+
+
+
+exports.getFollowers = async (res, userCode) => {
+  try {
+    let data = await User.aggregate([
+      {
+        $lookup: {
+          from: "followerfollowingusers",
+          localField: "userCode",
+          foreignField: "followerUserCode",
+          as: "followedUsers",
+        },
+      },
+      {
+        $match: {
+          "followedUsers.followingUserCode": userCode
+        }
+      },
+      {
+        $project: {
+          _id: 0,
+          userName: 1,
+          userCode: 1,
+          isFollowing: { $literal: true },
+        },
+      },
+    ]);
+
+    return sendSuccess(res, 200, "", {
+      users: data.length ? data : [],
+    });
+  } catch (error) {
+    return sendError(res, 500, error.message);
+  }
+};
+

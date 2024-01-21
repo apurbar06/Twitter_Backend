@@ -30,4 +30,13 @@ route.post(
 );
 
 route.get("/tweets", authentication.verifyToken, Controller.getTweets);
+
+route.get("/me", authentication.verifyToken, Controller.getMe);
+
+route.get("/users", authentication.verifyToken, Controller.getUsers);
+
+route.get("/following", authentication.verifyToken, Controller.getFollowing);
+
+route.get("/followers", authentication.verifyToken, Controller.getFollowers);
+
 module.exports = route;
